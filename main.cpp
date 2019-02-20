@@ -2,42 +2,40 @@
 #include <vector>
 #include <string>
 #include <cmath>
-#include <iostream>
+//#include <iostream>
 #include <unistd.h>
 #include <SFML/Graphics.hpp>
 //////////////////////////
-sf::RectangleShape O(sf::Vector2f(5, 5));
-int BodyDirection[100];
-bool acc=0;
+//Position of snake
+struct position
+{
+    int x;
+    int y;
+};
+
+int last_move = 4; //how many move we did
+sf::RectangleShape O(sf::Vector2f(5, 5)); //To copy Body Patch
+int HeadDirection = 3; //Start Direction
+bool acc = 0; //if snake have an accident acc = 1
 std::vector<sf::RectangleShape> Body;
+std::vector<position> Pos; //Position where is snake
 int points =  0;
-bool first_food;
-sf::Font globalFont;
+bool first_food; //on the start of the round to generate food
+sf::Font globalFont; //Font to subtitles
 sf::RectangleShape Food(sf::Vector2f(5, 5));
-bool CheckFood();
-bool ChechHit(sf::RenderWindow &W);
+bool CheckFood(); //Check if snake ate a food
+bool ChechHit(sf::RenderWindow &W); //Check if snake Hit a bar or himself
+
 bool Movement(sf::RenderWindow &W)
 {
-        if(BodyDirection[0] == 0)
-        {
-            for(int i=0; i<=4;i++)
-            {
-            Body[0].move(0, -1);
-
-            ChechHit(W);
-            CheckFood();
-            }
-        }
-        if(BodyDirection[0] == 2)
-        {
-            for(int i=0; i<=4;i++)
-            {
-            Body[0].move(0, 1);
-            ChechHit(W);
-            CheckFood();
-            }
-        }
-        if(BodyDirection[0] == 3)
+//add new position
+            position add;
+            add.x = Body[0].getPosition().x;
+            add.y = Body[0].getPosition().y;
+            Pos.push_back(add);
+            ++last_move;
+//do a move
+        if(HeadDirection == 3)
         {
             for(int i=0; i<=4;i++)
             {
@@ -46,219 +44,53 @@ bool Movement(sf::RenderWindow &W)
             CheckFood();
             }
         }
-        if(BodyDirection[0] == 1)
+
+        if(HeadDirection == 0)
+        {
+            for(int i=0; i<=4;i++)
+            {
+            Body[0].move(0, -1);
+            ChechHit(W);
+            CheckFood();
+            }
+        }
+        if(HeadDirection == 2)
+        {
+            for(int i=0; i<=4;i++)
+            {
+            Body[0].move(0, 1);
+            ChechHit(W);
+            CheckFood();
+            }
+        }
+        if(HeadDirection == 1)
         {
             for(int i=0; i<=4;i++)
             {
             Body[0].move(1, 0);
-           ChechHit(W);
+            ChechHit(W);
             CheckFood();
             }
         }
-
+//////
 }
-void Body_Movement(sf::RenderWindow &W)
+void Body_Movement()
 {
-
-for(int i = 1; i <= (4+points); i++)
+//Body make a move (replace place where wa a head)
+    for(int i = 1; i <= (4 + points); i++)
     {
-        if(BodyDirection[i-1] == 0)
-      {
-            if(BodyDirection[i] == 0)
-            {
-                if(Body[i].getPosition().x != Body[i-1].getPosition().x)
-                {
-                    if(Body[i].getPosition().x > Body[i-1].getPosition().x)
-                        {
-                            Body[i].move(-5, 0);
-                        }
-                    else
-                        {
-                            Body[i].move(5, 0);
-                        }
-
-
-                }
-                else Body[i].move(0, -5);
-            }
-            if(BodyDirection[i] == 1)
-            {
-
-                Body[i].move(5, 0);
-                if(Body[i].getPosition().x == Body[i-1].getPosition().x)
-                    BodyDirection[i] = 0;
-            }
-            if(BodyDirection[i] == 3)
-            {
-                Body[i].move(-5, 0);
-                if(Body[i].getPosition().x == Body[i-1].getPosition().x)
-                    BodyDirection[i] = 0;
-            }
-
-          if(BodyDirection[i] == 2)
-            {
-                if(Body[i].getPosition().x > Body[i-1].getPosition().x && Body[i].getPosition().y > Body[i-1].getPosition().y)
-                    {
-                        Body[i].move(-5, 0);
-                        BodyDirection[i] = 0;
-                    }
-                    else if(Body[i].getPosition().x < Body[i-1].getPosition().x && Body[i].getPosition().y > Body[i-1].getPosition().y)
-                    {
-                        Body[i].move(5, 0);
-                        BodyDirection[i] = 0;
-                    }
-            }
-       }
-    if(BodyDirection[i - 1] == 1)
-    {
-        if(BodyDirection[i] == 1)
-        {
-            if(Body[i].getPosition().y != Body[i-1].getPosition().y)
-            {
-                if(Body[i].getPosition().y > Body[i-1].getPosition().y)
-                    BodyDirection[i] = 0;
-
-                else if (Body[i].getPosition().y < Body[i-1].getPosition().y)
-                        BodyDirection[i] = 0;
-            }
-            else
-            {
-                Body[i].move(5, 0);
-            }
-
-        }
-            if(BodyDirection[i] == 0)
-            {
-                Body[i].move(0, -5);
-                if(Body[i].getPosition().y == Body[i-1].getPosition().y)
-                BodyDirection[i] = 1;
-            }
-            if(BodyDirection[i] == 2)
-            {
-                Body[i].move(0, 5);
-                if(Body[i].getPosition().y == Body[i-1].getPosition().y)
-                BodyDirection[i] = 1;
-            }
-
-            if(BodyDirection[i] == 3)
-            {
-                if(Body[i].getPosition().y > Body[i-1].getPosition().y && Body[i].getPosition().x < Body[i-1].getPosition().x)
-                    {
-                        Body[i].move(0, -5);
-                        BodyDirection[i] = 1;
-                    }
-                    else if(Body[i].getPosition().y < Body[i-1].getPosition().y && Body[i].getPosition().x < Body[i-1].getPosition().x)
-                    {
-                        Body[i].move(0, 5);
-                        BodyDirection[i] = 1;
-                    }
-            }
-    }
-    if(BodyDirection[i - 1] == 2)
-    {
-        if(BodyDirection[i] == 2)
-            {
-
-                if(Body[i].getPosition().x != Body[i-1].getPosition().x)
-                {
-                    if(Body[i].getPosition().y > Body[i-1].getPosition().y)
-                    Body[i].move(-5, 0);
-                else
-                    Body[i].move(5, 0);
-                }
-                    else
-                        Body[i].move(0, 5);
-
-
-            }
-            if(BodyDirection[i] == 3)
-            {
-                Body[i].move(-5, 0);
-                if(Body[i].getPosition().x == Body[i-1].getPosition().x)
-                BodyDirection[i] = 2;
-            }
-            if(BodyDirection[i] == 1)
-            {
-                Body[i].move(5, 0);
-                if(Body[i].getPosition().x == Body[i-1].getPosition().x)
-                BodyDirection[i] = 2;
-            }
-
-            if(BodyDirection[i] == 0)
-            {
-                if(Body[i].getPosition().x > Body[i-1].getPosition().x && Body[i].getPosition().y < Body[i-1].getPosition().y)
-                    {
-                        Body[i].move(-5, 0);
-                        BodyDirection[i] = 2;
-                    }
-                    else if(Body[i].getPosition().x < Body[i-1].getPosition().x && Body[i].getPosition().y < Body[i-1].getPosition().y)
-                    {
-                        Body[i].move(5, 0);
-                        BodyDirection[i] = 2;
-                    }
-
-
-            }
-    }
-    if(BodyDirection[i - 1] == 3)
-    {
-        if(BodyDirection[i] == 3)
-            {
-                if(Body[i].getPosition().y != Body[i-1].getPosition().y)
-                {
-                if(Body[i].getPosition().y > Body[i-1].getPosition().y)
-                 Body[i].move(0, -5);
-
-                else
-                    Body[i].move(0, 5);
-
-
-                }
-                else Body[i].move(-5, 0);
-
-            }
-            if(BodyDirection[i] == 2)
-            {
-                Body[i].move(0, 5);
-                if(Body[i].getPosition().y == Body[i-1].getPosition().y)
-                BodyDirection[i] = 3;
-            }
-            if(BodyDirection[i] == 0)
-            {
-                Body[i].move(0, -5);
-                if(Body[i].getPosition().y == Body[i-1].getPosition().y)
-                BodyDirection[i] = 3;
-            }
-            if(BodyDirection[i] == 1)
-            {
-                if(Body[i].getPosition().y > Body[i-1].getPosition().y && Body[i].getPosition().x > Body[i-1].getPosition().x)
-                    {
-                        Body[i].move(0, -5);
-                        BodyDirection[i] = 3;
-                    }
-                    else if(Body[i].getPosition().y < Body[i-1].getPosition().y && Body[i].getPosition().x > Body[i-1].getPosition().x)
-                    {
-                        Body[i].move(0, 5);
-                        BodyDirection[i] = 3;
-                    }
-
-
-            }
+        Body[i].setPosition(Pos[last_move - i ].x, Pos[last_move - i ].y);
     }
 
-}
-
-
-//////////////////////////////////
 }
 
 void New_Game(sf::RenderWindow &W)
 {
-/////////////////Obramowanie
+/////////////////Building a board
     sf::RectangleShape up(sf::Vector2f(600,5));
     up.setFillColor(sf::Color::White);
     up.setPosition(100,100);
-//(0xFFFFFF)
+
     sf::RectangleShape down(sf::Vector2f(600,5));
     down.setFillColor(sf::Color::White);
     down.setPosition(100, 400);
@@ -275,6 +107,7 @@ void New_Game(sf::RenderWindow &W)
     W.draw(down);
     W.draw(left);
     W.draw(right);
+    /////////////////////
 }
 
 void Food_Generate();
@@ -284,31 +117,9 @@ bool CheckFood()
 {
     if( abs(Body[0].getPosition().x - Food.getPosition().x) <= 5 && abs(Body[0].getPosition().y - Food.getPosition().y) <= 5)
     {
-        Body.push_back(O);
+        Body.push_back(O);  //adding new body patch
         points++;
         Body[(4 + points)] = Body[0];
-        //////////////////////////////////////////////////////////////////////////////////////////
-        if(BodyDirection[3 + points] == 0)
-        {
-            Body[4 + points].setPosition(Body[3 + points].getPosition().x, Body[3 + points].getPosition().y + 5);
-            BodyDirection[4 + points] = BodyDirection[3 + points];
-        }
-        if(BodyDirection[3 + points] == 1)
-        {
-        Body[4 + points].setPosition(Body[3 + points].getPosition().x-5, Body[3 + points].getPosition().y);
-        BodyDirection[4 + points] = BodyDirection[3 + points];
-        }
-        if(BodyDirection[3 + points] == 2)
-        {
-        Body[4 + points].setPosition(Body[3 + points].getPosition().x, Body[3 + points].getPosition().y - 5);
-        BodyDirection[4 + points] = BodyDirection[3 + points];
-        }
-        if(BodyDirection[3 + points] == 3)
-        {
-        Body[4 + points].setPosition(Body[3 + points].getPosition().x+5, Body[3 + points].getPosition().y);
-        BodyDirection[4 + points] = BodyDirection[3 + points];
-        }
-
         Food_Generate();
         return true;
     }
@@ -316,49 +127,50 @@ bool CheckFood()
 
 bool ChechHit(sf::RenderWindow &W)
 {
+    //Chech if head hit another part of the body
     for(int i = 1; i < (4+points); i++)
     {
         if((abs(Body[0].getPosition().x - Body[i].getPosition().x) <= 2) && (abs(Body[0].getPosition().y - Body[i].getPosition().y) <= 2))
             {
-            acc = 1;
-            sf::Text napis;
-        napis.setString("End game! To play again press space, to quit press esc");
-        napis.setFillColor(sf::Color::Black);
-        napis.setPosition(165, 250);
-        napis.setFont(globalFont);
-        napis.setCharacterSize(20);
+        sf::Text sub;
+        sf::Text summary;
+
+        summary.setFillColor(sf::Color::Black);
+        summary.setPosition(391 , 277);
+        summary.setFont(globalFont);
+        summary.setCharacterSize(20);
+        sub.setString("End game! To play again press space, to quit press esc \n \t \t \t \t \t \t Points:");
+
+        std::string StringPoints = std::to_string(points);
+        summary.setString(StringPoints);
+
+        sub.setFillColor(sf::Color::Black);
+        sub.setPosition(165 , 250);
+        sub.setFont(globalFont);
+        sub.setCharacterSize(20);
         globalFont.loadFromFile("OpenSans-Bold.ttf");
         W.clear(sf::Color::White);
-        W.draw(napis);
+        W.draw(sub);
+        W.draw(summary);
         W.display();
-        sf::Event e;
-        while(!sf::Keyboard::isKeyPressed(sf::Keyboard::Space) || !sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
-        {
-        bool go = true;
-            while(W.pollEvent(e) || go == true)
-            {
-            if(e.type == sf::Event::Closed)
-                W.close();
-            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
-                W.close();
-            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
-            {
-                Body[0].setPosition(400, 250);
-                Body[1].setPosition(405, 250);
-                Body[2].setPosition(410, 250);
-                Body[3].setPosition(415, 250);
-                Body[4].setPosition(420, 250);
-                while(Body.size() > 5)
-                    Body.pop_back();
-                BodyDirection[0] = BodyDirection[1] = BodyDirection[2] = BodyDirection[3] = BodyDirection[4] = 3;
-                points = 0;
-                first_food = true;
-                New_Game(W);
-                break;
-            }
-        }
-        break;
-        }
+                sf::Event e;
+                while(!sf::Keyboard::isKeyPressed(sf::Keyboard::Space) || !sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
+                {
+                    bool go = true;
+                    while(W.pollEvent(e) || go == true)
+                    {
+                        if(e.type == sf::Event::Closed)
+                            W.close();
+                        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
+                            W.close();
+                        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
+                        {
+                            //New Game
+                            acc = 1;
+                           return true; //back to main
+                        }
+                    }
+                }
 
             }
     }
@@ -366,61 +178,45 @@ bool ChechHit(sf::RenderWindow &W)
 
     if(Body[0].getPosition().x <= 103 || Body[0].getPosition().x >= 698 || Body[0].getPosition().y <= 100 || Body[0].getPosition().y >= 399 )
     {
-        acc=1;
-        sf::Text napis;
+    //
+        sf::Text sub;
         sf::Text summary;
 
         summary.setFillColor(sf::Color::Black);
         summary.setPosition(391 , 277);
         summary.setFont(globalFont);
         summary.setCharacterSize(20);
-        napis.setString("End game! To play again press space, to quit press esc \n \t \t \t \t \t \t Points:");
+        sub.setString("End game! To play again press space, to quit press esc \n \t \t \t \t \t \t Points:");
 
         std::string StringPoints = std::to_string(points);
         summary.setString(StringPoints);
 
-        napis.setFillColor(sf::Color::Black);
-        napis.setPosition(165 , 250);
-        napis.setFont(globalFont);
-        napis.setCharacterSize(20);
+        sub.setFillColor(sf::Color::Black);
+        sub.setPosition(165 , 250);
+        sub.setFont(globalFont);
+        sub.setCharacterSize(20);
         globalFont.loadFromFile("OpenSans-Bold.ttf");
         W.clear(sf::Color::White);
-        W.draw(napis);
+        W.draw(sub);
         W.draw(summary);
         W.display();
         sf::Event e;
         while(!sf::Keyboard::isKeyPressed(sf::Keyboard::Space) || !sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
        {
-        bool go = true;
+            bool go = true;
             while(W.pollEvent(e) || go == true)
             {
-            if(e.type == sf::Event::Closed)
-                W.close();
-            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
-                W.close();
-            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
-            {
-                Body[0].setPosition(400, 250);
-                Body[1].setPosition(405, 250);
-                Body[2].setPosition(410, 250);
-                Body[3].setPosition(415, 250);
-                Body[4].setPosition(420, 250);
-                while(Body.size() > 5)
-                    Body.pop_back();
-                ///////////////////
-                BodyDirection[0] = 3;
-                BodyDirection[1] = 3;
-                BodyDirection[2] = 3;
-                BodyDirection[3] = 3;
-                BodyDirection[4] = 3;
-                points = 0;
-                first_food = true;
-                New_Game(W);
-                break;
-
+                if(e.type == sf::Event::Closed) //EXIT
+                    W.close();
+                if(sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) //EXIT
+                    W.close();
+                if(sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
+                {
+                //NEW GAME
+                    acc=1;
+                    return true;
+                }
             }
-       }
-        break;
         }
     }
     else
@@ -430,19 +226,34 @@ bool ChechHit(sf::RenderWindow &W)
 
 int main()
 {
-
+//and Body
     for(int i = 0; i < 5; i++)
     {
         Body.push_back(O);
-        BodyDirection[i] = 3;
         Body[i].setFillColor(sf::Color::White);
     }
+    //Set Position
  	Body[0].setPosition(400, 250);
     Body[1].setPosition(405, 250);
     Body[2].setPosition(410, 250);
     Body[3].setPosition(415, 250);
     Body[4].setPosition(420, 250);
 
+    position p1, p2, p3, p4, p0;
+    p0.x = 420;
+    p0.y = 250;
+    p1.x = 415;
+    p1.y = 250;
+    p2.x = 410;
+    p2.y = 250;
+    p3.x = 405;
+    p3.y = 250;
+
+    Pos.push_back(p0);
+    Pos.push_back(p1);
+    Pos.push_back(p2);
+    Pos.push_back(p3);
+    /////
 
 
     first_food = true;
@@ -466,7 +277,7 @@ int main()
     while(!sf::Keyboard::isKeyPressed(sf::Keyboard::Space) || !sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
     {
     bool go = true;
-        while(W.pollEvent(e) || go ==true)
+        while(W.pollEvent(e) || go == true)
         {
             if(sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
                 W.close();
@@ -497,7 +308,7 @@ int main()
     sf::Clock clock;
     sf::Time time1;
 
-
+    W.setFramerateLimit(60); //MAX FPS
     while(W.isOpen())
     {
 
@@ -508,32 +319,29 @@ int main()
             /////////////////////////////////////////////////////////Movement
 
 
-            if(!(sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) &&(!sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) && (!sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) && (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) )
-            {
-                if(BodyDirection[0] != 2)
-                BodyDirection[0] =  0;
+                    if(!(sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) &&(!sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) && (!sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) && (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) )
+                    {
+                        if(HeadDirection != 2)
+                            HeadDirection =  0;
 
-            }
+                    }
 
-            if((!sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) &&(!sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) && (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) && (!sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) )
-            {
-                if(BodyDirection[0] != 0)
-                BodyDirection[0] = 2;
+                    if((!sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) &&(!sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) && (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) && (!sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) )
+                    {
+                        if(HeadDirection != 0)
+                            HeadDirection = 2;
+                    }
 
-            }
-
-            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Left) &&(!sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) && (!sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) && (!sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) )
-            {
-                if(BodyDirection[0] != 1)
-                BodyDirection[0] = 3;
-
-
-            }
-            if((!sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) &&(sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) && (!sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) && (!sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) )
-            {
-                if(BodyDirection[0] != 3)
-                BodyDirection[0] = 1;
-            }
+                    if(sf::Keyboard::isKeyPressed(sf::Keyboard::Left) &&(!sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) && (!sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) && (!sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) )
+                    {
+                        if(HeadDirection != 1)
+                            HeadDirection = 3;
+                    }
+                    if((!sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) &&(sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) && (!sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) && (!sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) )
+                    {
+                                if(HeadDirection != 3)
+                                    HeadDirection = 1;
+                    }
 
             }
 
@@ -545,42 +353,55 @@ int main()
 
 
         time1 = clock.getElapsedTime();
-        if (time1.asMilliseconds() >= 1000/20)
+        if (time1.asMilliseconds() >= 50)////////////// Do a move
         {
             Movement(W);
-            Body_Movement(W);
+            Body_Movement();
             clock.restart();
         }
 
 
-        if(acc == 1)
+        if(acc == 1) //IF was an accident do a board like on the beginning
         {
+                while(Body.size() > 5)
+                    Body.pop_back();
+
+                while(Pos.size() > 0)
+                    Pos.pop_back();
+
+                HeadDirection = 3;
+                points = 0;
+                last_move = 4;
+                first_food = true;
+                New_Game(W);
+
             Body[0].setPosition(400, 250);
             Body[1].setPosition(405, 250);
             Body[2].setPosition(410, 250);
             Body[3].setPosition(415, 250);
             Body[4].setPosition(420, 250);
+            Pos.push_back(p0);
+            Pos.push_back(p1);
+            Pos.push_back(p2);
+            Pos.push_back(p3);
         }
-        acc = 0;
+
+
 
         New_Game(W);
         StringPoints = std::to_string(points);
         ShowPoints.setString(StringPoints);
         acc = false;
         W.draw(Show);
-       for(int i = 0; i <= (4 + points); i++)
+
+        for(int i = 0; i <= (4 + points); i++)
         {
             W.draw(Body[i]);
         }
 
-
-
         W.draw(Food);
         W.draw(ShowPoints);
         W.display();
-
-
-
     }
 
 
@@ -588,7 +409,7 @@ int main()
 }
 
 
-void Food_Generate()
+void Food_Generate() //Generate a food in random place
 {
     Food.setFillColor(sf::Color::White);
     srand( time( NULL));
