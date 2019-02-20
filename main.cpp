@@ -2,7 +2,6 @@
 #include <vector>
 #include <string>
 #include <cmath>
-//#include <iostream>
 #include <unistd.h>
 #include <SFML/Graphics.hpp>
 //////////////////////////
